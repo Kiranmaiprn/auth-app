@@ -10,7 +10,15 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # def new
   #   super
   # end
-
+  def index
+    # @users=order(created_at: :desc)
+    # if current_user.has_role? "admin"
+    #   @user=User.order(created_at: :desc)
+    #   render json: @user
+    # else
+    #   redirect_to root_path, alert: "user not a admin"
+    # end
+  end
 
   # POST /resource
   def create

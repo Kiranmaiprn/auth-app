@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 
  devise_scope :user   do
    get "/pop", to: "users/registrations#pop", as: "users_pop"
+   get 'users/index', to: "users/registrations#index"
    
  end
 
@@ -13,6 +14,7 @@ Rails.application.routes.draw do
 
   get 'member_details' ,to: "members#index"
 
+  
 
   namespace :api do
     namespace :v1 do

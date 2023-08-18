@@ -47,3 +47,6 @@ group :development do
 end
 gem 'devise'
 gem 'devise-jwt'
+gem 'pundit'
+
+gem "noticed", "~> 1.6"

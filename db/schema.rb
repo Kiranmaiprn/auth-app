@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_18_071554) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_24_052447) do
+  create_table "comments", force: :cascade do |t|
+    t.integer "company_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "comment"
+    t.index ["company_id"], name: "index_comments_on_company_id"
+    t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
   create_table "companies", force: :cascade do |t|
     t.string "name"
     t.string "established_year"
@@ -43,10 +53,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_18_071554) do
     t.datetime "updated_at", null: false
     t.string "jti"
     t.string "role"
+    t.string "name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "comments", "companies"
+  add_foreign_key "comments", "users"
   add_foreign_key "companies", "users"
 end

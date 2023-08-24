@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
-  before_action :authenticate_user!, only: [:update]
+  before_action :authenticate_user!, only: [:update, :destroy, :index]
+  after_action :send_mail_to_admin, only: [:create]
   respond_to :json
   # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]
@@ -11,26 +12,29 @@ class Users::RegistrationsController < Devise::RegistrationsController
   #   super
   # end
   def index
-    # @users=order(created_at: :desc)
-    # if current_user.has_role? "admin"
-    #   @user=User.order(created_at: :desc)
-    #   render json: @user
-    # else
-    #   redirect_to root_path, alert: "user not a admin"
-    # end
+    
+    @users=order(created_at: :desc)
+    if current_user.has_role? "admin"
+      @user=User.order(created_at: :desc)
+      render json: @user
+    else
+      render plain: "You are not admin"
+    end
   end
 
   # POST /resource
   def create
-    
     @user=User.create(user_params)
+    @admin_user = User.find_by(role: "admin") 
     if @user.save
+      CommentNotification.with(user: @user).deliver_later(@admin_user)
+
+      # CrudNotificationMailer.with(user: @user).comment_notification.deliver_now
+
       render json: @user
     else
       render json: @user.errors
     end
-  
-
   end
 
   # GET /resource/edit
@@ -42,6 +46,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def update
     @user=current_user
     if @user.update(user_params)
+      CrudNotificationMailer.update_notification(@user).deliver_now
       render json: current_user
     else
       render json: @user.errors
@@ -50,9 +55,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   # DELETE /resource
-  # def destroy
-  #   super
-  # end
+  def destroy
+    @user=current_user
+    CrudNotificationMailer.delete_notification(@user).deliver_now
+    @user.destroy
+    render plain: "deleted successfully"
+
+  end
 
   # GET /resource/cancel
   # Forces the session data which is usually expired after sign
@@ -86,17 +95,22 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # end
 
   private
+
+  def send_mail_to_admin
+    # User.find_each do |user|
+    @user=User.find_by(role: "admin")
+      CommentNotification.with(user: @user).deliver_later(current_user)
+  end
+
   def user_params
     params.require(:user).permit(:email,:password)
   end
-
-
 
   def respond_with(resource, _opts={})
    
     if resource.persisted?
       render json: {
-        status: {code:200, message:"signed up successfully, data: resource"}
+        status: {code:200, message:"signed up successfully", data: resource}
       }
     else
       render json: {
@@ -105,5 +119,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       }, status: :unprocessable_entity
     end
   end
+
+  
 
 end

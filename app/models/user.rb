@@ -9,6 +9,8 @@ include Devise::JWT::RevocationStrategies::JTIMatcher
         :jwt_authenticatable, jwt_revocation_strategy: self
 
    has_many :companies
+   has_many :comments
+   
    ROLES = %w{super_admin admin manager editor}
   def jwt_payload
     super

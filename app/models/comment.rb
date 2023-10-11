@@ -10,7 +10,6 @@ class Comment < ApplicationRecord
 
   def notify_recipient
     CommentNotification.with(comment: self, company: company).deliver_later(company.user)
-
   end
   def cleanup_notifications
     notifications_as_comment.destroy_all

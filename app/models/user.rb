@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_many :notifications, as: :recipient, dependent: :destroy
 
 
+
+
 include Devise::JWT::RevocationStrategies::JTIMatcher
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -40,6 +42,8 @@ include Devise::JWT::RevocationStrategies::JTIMatcher
   #   role  == 'editor'
   # end
 
+
+ 
   
          
 end

@@ -66,7 +66,7 @@ Rails.application.configure do
   config.hosts << "ec56-183-82-122-219.ngrok-free.app"
 
   config.action_mailer.delivery_method = :smtp
-config.action_mailer.smtp_settings = {
+  config.action_mailer.smtp_settings = {
   user_name: 'k50194204@gmail.com',
   password: 'khwjwcutmwsoeagl',
   address: 'smtp.gmail.com',

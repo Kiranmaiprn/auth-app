@@ -48,5 +48,6 @@ end
 gem 'devise'
 gem 'devise-jwt'
 gem 'pundit'
+gem 'jsonapi-serializer'
 
 gem "noticed", "~> 1.6"

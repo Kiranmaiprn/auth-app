@@ -14,5 +14,18 @@ class Company < ApplicationRecord
   # You can override the param_name, the notification model name, or disable the before_destroy callback
   has_noticed_notifications param_name: :parent, destroy: false, model_name: "Notification"
 
+
+  validate :length_and_string_presence
+  
+  private
+    
+    def title_rules_adhered?
+      name.include?("great-article")
+    end
+    def length_and_string_presence
+      unless title_rules_adhered?
+        errors.add(:title, "must contain 'The company'")
+      end  
+    end
   
 end

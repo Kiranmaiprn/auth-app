@@ -32,7 +32,8 @@ class CrudNotificationMailer < ApplicationMailer
     @user=params[:user]
     mail to: @user.email,
     subject: "a new entry for  has been created", 
-    body: "A new user signed up with a new account"
-
+    body: "Hi #{@user.name} with email #{@user.email}
+         Thank you for registering with us
+         A new user signed up with a new account"
   end
 end

@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
+  include RackSessionFix
+
   before_action :authenticate_user!, only: [:update, :destroy, :index]
+
   after_action :send_mail_to_admin, only: [:create]
+
   respond_to :json
   # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]
@@ -12,14 +16,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
   #   super
   # end
   def index
-    
-    @users=order(created_at: :desc)
-    if current_user.has_role? "admin"
-      @user=User.order(created_at: :desc)
-      render json: @user
-    else
-      render plain: "You are not admin"
-    end
+    # @users=order(created_at: :desc)
+    # if current_user.has_role? "admin"
+    #   @user=User.order(created_at: :desc)
+    #   render json: @user
+    # else
+    #   render plain: "You are not admin"
+    # end
   end
 
   # POST /resource
@@ -27,10 +30,8 @@ class Users::RegistrationsController < Devise::RegistrationsController
     @user=User.create(user_params)
     @admin_user = User.find_by(role: "admin") 
     if @user.save
-      CommentNotification.with(user: @user).deliver_later(@admin_user)
-
+      CommentNotification.with(user: @user).deliver_later(@user)
       # CrudNotificationMailer.with(user: @user).comment_notification.deliver_now
-
       render json: @user
     else
       render json: @user.errors
@@ -51,7 +52,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
     else
       render json: @user.errors
     end
-
   end
 
   # DELETE /resource
@@ -60,7 +60,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
     CrudNotificationMailer.delete_notification(@user).deliver_now
     @user.destroy
     render plain: "deleted successfully"
-
   end
 
   # GET /resource/cancel
@@ -99,8 +98,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def send_mail_to_admin
     # User.find_each do |user|
     @user=User.find_by(role: "admin")
-      CommentNotification.with(user: @user).deliver_later(current_user)
+    CommentNotification.with(user: @user).deliver_later(current_user)
   end
+
 
   def user_params
     params.require(:user).permit(:email,:password)
@@ -108,10 +108,14 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def respond_with(resource, _opts={})
    
-    if resource.persisted?
+    if request.method == 'POST' && resource.persisted?
       render json: {
         status: {code:200, message:"signed up successfully", data: resource}
       }
+    elsif request.method == 'DELETE'
+      render json: {
+        status: {code:200, message: "Account deleted successfully"}
+      }, status: :ok
     else
       render json: {
         status: {message: "user could not be created successfylly", 
@@ -119,7 +123,4 @@ class Users::RegistrationsController < Devise::RegistrationsController
       }, status: :unprocessable_entity
     end
   end
-
-  
-
 end
